@@ -1,6 +1,7 @@
 const canvasEl = document.querySelector("canvas")
 const canvasCtx = canvasEl.getContext("2d")
 const gapX = 10
+const mouse = { x: 0, y: 0 }
 
 const field = {
     w: window.innerWidth,
@@ -27,9 +28,14 @@ const leftPaddle = {
     y: 200,
     w: line.w,
     h: 200,
+    _move: function () {
+        this.y = mouse.y - this.h / 2
+    },
     draw: function () {
         canvasCtx.fillStyle = "#FFFFFF"
         canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+
+        this._move()
     }
 }
 
@@ -38,9 +44,14 @@ const rightPaddle = {
     y: 300,
     w: line.w,
     h: 200,
+    _move: function () {
+        this.y = ball.y
+    },
     draw: function () {
         canvasCtx.fillStyle = "#FFFFFF"
         canvasCtx.fillRect(this.x, this.y, this.w, this.h)
+
+        this._move()
     }
 }
 
@@ -61,14 +72,20 @@ const ball = {
     x: 300,
     y: 200,
     r: 20,
+    speed: 5,
+    _move: function () {
+        this.x += 1 * this.speed
+        this.y += 1 * this.speed
+    },
     draw: function () {
         canvasCtx.fillStyle = "#FFFFFF"
         canvasCtx.beginPath()
         canvasCtx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false)
         canvasCtx.fill()
+
+        this._move()
     }
 }
-
 
 function setup() {
     canvasEl.width = field.w
@@ -92,5 +109,28 @@ function draw() {
     score.draw()
 }
 
+window.animateFrame = (function () {
+    return (
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            return window.setTimeout(callback, 1000 / 60)
+        }
+    )
+})()
+
+function main() {
+    animateFrame(main)
+    draw()
+}
+
 setup()
-draw()
+main()
+
+canvasEl.addEventListener("mousemove", function (e) {
+    mouse.x = e.pageX
+    mouse.y = e.pageY
+})
